@@ -1,0 +1,87 @@
+# 外卖评论的方面级情感分析配置文件
+
+# 全局设置
+seed: 42
+
+# 数据路径
+data:
+  raw_train_path: "data/raw/asap_train.csv"
+  raw_dev_path: "data/raw/asap_dev.csv"
+  raw_test_path: "data/raw/asap_test.csv"
+  processed_dir: "data/processed"
+
+# 预训练设置
+pretraining:
+  base_model: "bert-base-chinese"
+  output_dir: "data/pretrained/waimai-bert"
+  mlm_probability: 0.15
+  max_length: 128
+  batch_size: 32
+  learning_rate: 5e-5
+  weight_decay: 0.01
+  epochs: 5
+  warmup_ratio: 0.1
+  use_dev_texts: true
+  validate: true
+
+# 聚类设置
+clustering:
+  base_model: "data/pretrained/waimai-bert/best_model"
+  max_length: 128
+  batch_size: 32
+  seed_ratio: 0.08
+
+# 主动学习设置
+active_learning:
+  base_model: "data/pretrained/waimai-bert/best_model"
+  model_type: "enhanced"
+  output_dir: "checkpoints/active_learning"
+  max_length: 128
+  batch_size: 16
+  learning_rate: 3e-5
+  weight_decay: 0.01
+  epochs: 10
+  warmup_ratio: 0.1
+  initial_samples_ratio: 0.08
+  budget_per_round: 0.08
+  max_rounds: 5
+  eval_metric: "macro_f1"
+  alpha: 0.4
+  use_uda: true
+  augment_only_labeled: true
+  augmentation_ratio: 2.0
+  consistency_alpha: 0.2
+  use_aspect_weights: true
+  aspect_reg_base: 0.001
+
+# UDA设置
+uda:
+  base_model: "data/pretrained/waimai-bert/best_model"
+  mask_ratio: 0.15
+  max_length: 128
+  max_predictions: 20
+  temperature: 1.0
+  num_augmentations: 3
+  retain_aspect_tokens: true
+
+# 方面特定设置
+aspect_weights:
+  high_priority_aspects:
+    - "Location#Easy_to_find"
+    - "Service#Queue"
+    - "Service#Hospitality"
+    - "Service#Timely"
+    - "Price#Discount"
+    - "Ambience#Noise"
+    - "Food#Taste"
+    - "Food#Recommend"
+  sampling_weight_multiplier: 1.5
+  aspect_keywords:
+    "Location#Easy_to_find": ["位置", "地方", "找到", "方便", "地址", "地理位置"]
+    "Service#Queue": ["排队", "等待", "等候", "人多", "拥挤", "队伍"]
+    "Service#Hospitality": ["服务", "态度", "热情", "客气", "服务员", "招待"]
+    "Service#Timely": ["及时", "速度", "快", "慢", "送餐", "配送", "等待时间"]
+    "Price#Discount": ["优惠", "折扣", "促销", "便宜", "实惠", "划算", "特价"]
+    "Ambience#Noise": ["噪音", "嘈杂", "安静", "吵", "环境", "声音"]
+    "Food#Taste": ["味道", "口感", "美味", "好吃", "难吃", "鲜美", "可口"]
+    "Food#Recommend": ["推荐", "建议", "值得", "再来", "介绍", "喜欢"] 
